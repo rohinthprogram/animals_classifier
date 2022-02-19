@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<h1>Animal Classifier</h1>
+<form method="POST" enctype="multipart/form-data">
+    <input type="file" name="img"/>
+    <input type="submit"/>
+</form>
+
+{% if output %}
+<h1> Predcition : {{ output }} </h1>
+{% endif %}
+
+{% endblock content %}
