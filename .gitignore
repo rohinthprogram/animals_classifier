@@ -2,3 +2,4 @@ venv
 dataset
 .env
 save
+dl.ipynb

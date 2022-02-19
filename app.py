@@ -1,64 +1,57 @@
-from flask import Flask, render_template, request
+from flask import Flask, request
 
-import requests, json
+import json
 import numpy as np
 from keras.models import load_model
 import os
+import cv2
 
-from dotenv import load_dotenv
-load_dotenv()
+import base64
+from PIL import Image
+from io import BytesIO
 
 app = Flask(__name__)
 
 classes = list(dict(json.load(open('translation.json'))).values())
 
-def api_call_cellstarthub(img):
-    API_KEY = os.environ.get("API_KEY")
-    USERNAME = os.environ.get("USERNAME")
-    API_NAME = os.environ.get("API_NAME")
-
-    #endpoint = f"https://api.cellstrathub.com/{ USERNAME }/{ API_NAME }"
-    #endpoint = f'localhost:5000/predict'
-    headers = {
-    "x-api-key": API_KEY,
-    "Content-Type": "application/json"
-    }
-
-    payload = {'img':img.tolist()}
-
-    # make a get request to load the model (needed if calling api after long time)
-    # print(requests.get(endpoint, headers=headers).json())
-
-    # Send POST request to get the output
-    response = requests.post(endpoint, headers=headers, json=payload).json()
-
-    print(response)
-    return response['output']
-
+def convert_base64_to_image(image_str, return_type='numpy'):
+    '''
+    Converts a base64 encoded image to Pillow Image or Numpy Array
+    
+    Args:
+        image_str (str): The pure base64 encoded string of the image
+        return_type (str): The type of image you want to convert it to. 
+                           Choices are [ numpy | pillow ]. Default is numpy.
+    Returns:
+        PIL.Image or numpy.array: The converted image
+    '''
+    image = Image.open(BytesIO(base64.b64decode(image_str)))
+    if return_type == 'numpy':
+        return np.array(image)
+    else:
+        return image
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    if request.method == "POST":
-        img = request.files['img']
-        imgstr = img.read()
-        img = np.fromstring(imgstr, np.uint8)
-        print(img)
-        output = api_call_cellstarthub(img)
-        return render_template('home.html', output=output)
-
-    return render_template('home.html')
+    return 'Hello'
 
 
-@app.route('/predict', methods=['POST'])
+@app.route('/classify', methods=['POST'])
 def predict():
-    print(request)
-    img = request
+    #print(request)
     
-    model = load_model('./save/animals_classifier.h5')
-    score = list(model.predict(img).tolist())[0]
-    label = classes[score.index(max(score))]
+    imgstr = request.data['img']
+    img = convert_base64_to_image(imgstr)
+    img = cv2.resize(img, (100, 100))
+    
+    img = np.reshape(img, (1, 100, 100, 3))
 
-    return label
+    model = load_model('./save/animals_classifier.h5')
+
+    score = list(sorted(list(model.predict(img).tolist())[0]))
+
+    return str(score)
+    
 
 if __name__ == '__main__':
     app.run(debug=True)
