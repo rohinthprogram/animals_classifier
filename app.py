@@ -4,11 +4,11 @@ import json
 import numpy as np
 from keras.models import load_model
 import os
-import cv2
 
 import base64
 from PIL import Image
 from io import BytesIO
+from skimage.transform import resize
 
 app = Flask(__name__)
 
@@ -42,7 +42,7 @@ def predict():
     
     imgstr = request.data['img']
     img = convert_base64_to_image(imgstr)
-    img = cv2.resize(img, (100, 100))
+    img = resize(img, (100, 100))
     
     img = np.reshape(img, (1, 100, 100, 3))
 
