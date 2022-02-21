@@ -40,7 +40,7 @@ def home():
 def predict():
     #print(request)
     
-    imgstr = request.json()['img']
+    imgstr = request.json['img']
     img = convert_base64_to_image(imgstr)
     img = resize(img, (100, 100))
     
