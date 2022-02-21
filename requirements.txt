@@ -2,3 +2,5 @@ flask
 keras
 tensorflow-cpu
 gunicorn
+opencv-python
+pillow
