@@ -44,7 +44,7 @@ def predict():
     img = convert_base64_to_image(imgstr)
     img = resize(img, (100, 100))
     
-    img = np.reshape(img, (1, 100, 100, 3))
+    img = np.reshape(img, (1, 100, 100, 3)) 
 
     model = load_model('./save/animals_classifier.h5')
 
